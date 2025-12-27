@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RollerCoin Oda Simülatörü</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e6e6e6;
+            min-height: 100vh;
+            padding: 15px;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid #3498db;
+        }
+
+        h1 {
+            color: #3498db;
+            margin-bottom: 8px;
+            font-size: 1.8em;
+            word-wrap: break-word;
+        }
+
+        .subtitle {
+            color: #2ecc71;
+            font-size: 1em;
+        }
+
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                flex-direction: row;
+            }
+            .control-panel {
+                flex: 0 0 320px;
+            }
+            .rooms-section {
+                flex: 1;
+            }
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #2c3e50;
+        }
+
+        .panel-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        h2, h3 {
+            color: #3498db;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+
+        h3 {
+            color: #2ecc71;
+            font-size: 1em;
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #bdc3c7;
+            font-size: 0.9em;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #34495e;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-top: 8px;
+            touch-action: manipulation;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8em;
+            width: auto;
+            display: inline-block;
+        }
+
+        .mobile-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #34495e;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .mobile-tab.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
+
+        .rooms-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+        }
+
+        @media (min-width: 1024px) {
+            .rooms-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .room {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #34495e;
+            min-width: 300px;
+        }
+
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .room-title {
+            color: #f1c40f;
+            font-size: 1.2em;
+        }
+
+        .shelves {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .shelf {
+            background: rgba(52, 73, 94, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            border: 1px solid #7f8c8d;
+            position: relative;
+        }
+
+        .shelf-number {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 0.8em;
+            color: #95a5a6;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        .shelf-floors {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .floor {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 6px;
+            padding: 10px;
+            border: 1px dashed #34495e;
+            position: relative;
+            min-height: 80px;
+        }
+
+        .floor-header {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: #2c3e50;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            color: #bdc3c7;
+        }
+
+        .floor-controls {
+            margin-top: 5px;
+        }
+
+        .floor-type-select {
+            width: 100%;
+            margin-bottom: 8px;
+            font-size: 0.85em;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .miner-slots {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+
+        .miner-slot {
+            flex: 1;
+            min-width: 120px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .miner-slot:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .miner-slot.single {
+            border-color: #9b59b6;
+        }
+
+        .miner-slot.double {
+            border-color: #e67e22;
+            min-width: 150px;
+        }
+
+        .miner-slot.empty {
+            border-color: #7f8c8d;
+            border-style: dashed;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .miner-slot.empty:hover {
+            border-color: #3498db;
+            background: rgba(52, 152, 219, 0.1);
+        }
+
+        .miner-content {
+            text-align: center;
+            padding: 5px 0;
+        }
+
+        .miner-name {
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .miner-stats {
+            font-size: 0.8em;
+            color: #bdc3c7;
+        }
+
+        .miner-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .badge-single {
+            background: #9b59b6;
+            color: white;
+        }
+
+        .badge-double {
+            background: #e67e22;
+            color: white;
+        }
+
+        .miner-actions {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: none;
+        }
+
+        .miner-slot.filled:hover .miner-actions {
+            display: block;
+        }
+
+        .remove-miner-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.8em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-miner-btn {
+            width: 100%;
+            padding: 8px;
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px dashed #2ecc71;
+            border-radius: 4px;
+            color: #2ecc71;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            margin-top: 5px;
+        }
+
+        .add-miner-btn:hover {
+            background: rgba(46, 204, 113, 0.4);
+            border-style: solid;
+        }
+
+        .shelf-select {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            padding: 8px;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #2ecc71;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #3498db;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            color: #f1c40f;
+            font-weight: bold;
+            margin: 8px 0;
+        }
+
+        .stat-label {
+            color: #bdc3c7;
+            font-size: 0.85em;
+        }
+
+        .miner-list, .shelf-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .miner-item, .shelf-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-size: 0.9em;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .item-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .item-info strong {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .item-actions button {
+            width: auto;
+            padding: 6px 10px;
+            font-size: 0.8em;
+            min-width: 50px;
+        }
+
+        .total-power {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .total-bonus {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        /* Mobil için özel stiller */
+        @media (max-width: 767px) {
+            header {
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .control-panel {
+                padding: 12px;
+            }
+            
+            .room {
+                padding: 12px;
+            }
+            
+            .shelves {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            input, select, button {
+                padding: 10px;
+                font-size: 16px;
+            }
+            
+            .miner-slot {
+                min-width: 100%;
+            }
+            
+            .miner-actions {
+                display: block !important;
+                opacity: 0.8;
+            }
+        }
+
+        /* Çok küçük ekranlar */
+        @media (max-width: 480px) {
+            .shelves {
+                grid-template-columns: 1fr;
+            }
+            
+            .mobile-tab {
+                min-width: 100px;
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            
+            .stat-card {
+                padding: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.3em;
+            }
+        }
+
+        .room-selector {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px 0;
+            margin-bottom: 15px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .room-btn {
+            padding: 12px 20px;
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid #3498db;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.3s;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .room-btn.active {
+            background: #3498db;
+            border-color: #3498db;
+        }
+
+        .room-btn:hover {
+            background: rgba(52, 152, 219, 0.3);
+        }
+
+        /* Scrollbar stilleri */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
+        }
+
+        /* Touch device optimizasyonu */
+        @media (hover: none) and (pointer: coarse) {
+            button, .mobile-tab, .room-btn {
+                min-height: 44px;
+            }
+            
+            input, select {
+                font-size: 16px;
+            }
+            
+            .miner-slot {
+                min-height: 60px;
+            }
+        }
+
+        .empty-slot {
+            color: #95a5a6;
+            font-style: italic;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 15px 0;
+        }
+
+        .miner-power {
+            color: #f1c40f;
+            font-weight: bold;
+        }
+
+        .miner-bonus {
+            color: #3498db;
+        }
+
+        .click-hint {
+            font-size: 0.75em;
+            color: #95a5a6;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .miner-slot.filled {
+            position: relative;
+        }
+
+        .miner-slot.filled:hover {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .miner-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #f1c40f;
+            font-weight: bold;
+            font-size: 0.8em;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .miner-number-list {
+            font-weight: bold;
+            color: #f1c40f;
+            margin-right: 5px;
+            font-size: 0.9em;
+        }
+
+        .calculation-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+
+        .formula {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 0.9em;
+        }
+
+        .shelf-bonus-display {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(52, 152, 219, 0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>RollerCoin Oda Simülatörü</h1>
+            <p class="subtitle">Yeni Hesaplama Sistemi</p>
+        </header>
+
+        <!-- Mobil için sekmeler -->
+        <div class="mobile-tabs">
+            <div class="mobile-tab active" onclick="showTab('control')">Kontrol Paneli</div>
+            <div class="mobile-tab" onclick="showTab('rooms')">Odalar</div>
+            <div class="mobile-tab" onclick="showTab('stats')">İstatistikler</div>
+        </div>
+
+        <div class="main-content">
+            <!-- Kontrol Paneli -->
+            <div class="control-panel" id="controlTab">
+                <div class="panel-section">
+                    <h2>Miner Yönetimi</h2>
+                    
+                    <div class="input-group">
+                        <label for="minerName">Miner Adı</label>
+                        <input type="text" id="minerName" placeholder="Ör: BTC Miner Pro">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="minerType">Miner Tipi</label>
+                        <select id="minerType">
+                            <option value="single">Tek Hücreli</option>
+                            <option value="double">Çift Hücreli</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="minerPower">Güç Değeri (TH/s)</label>
+                        <input type="number" id="minerPower" step="0.1" placeholder="Ör: 15.5">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="minerBonus">Bonus Oranı (%)</label>
+                        <input type="number" id="minerBonus" step="0.1" placeholder="Ör: 2.5">
+                    </div>
+                    
+                    <button id="addMinerBtn" class="btn-success">Miner Ekle</button>
+                    
+                    <h3 style="margin-top: 20px;">Miner Listesi (Numaralı)</h3>
+                    <div class="miner-list" id="minerList">
+                        <!-- Miner listesi buraya eklenecek -->
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Raf Yönetimi</h2>
+                    
+                    <div class="input-group">
+                        <label for="shelfName">Raf Adı</label>
+                        <input type="text" id="shelfName" placeholder="Ör: Premium Raf">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="shelfBonus">Raf Bonusu (%)</label>
+                        <input type="number" id="shelfBonus" step="0.1" placeholder="Ör: 5.0">
+                    </div>
+                    
+                    <button id="addShelfBtn" class="btn-success">Raf Ekle</button>
+                    
+                    <h3 style="margin-top: 20px;">Raf Listesi</h3>
+                    <div class="shelf-list" id="shelfList">
+                        <!-- Raf listesi buraya eklenecek -->
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2>Oda Seçimi</h2>
+                    <select id="roomSelect" onchange="changeRoom()">
+                        <option value="1">Oda 1 (12 Raf, 4 Katlı)</option>
+                        <option value="2">Oda 2 (18 Raf, 4 Katlı)</option>
+                        <option value="3">Oda 3 (18 Raf, 4 Katlı)</option>
+                        <option value="4">Oda 4 (18 Raf, 4 Katlı)</option>
+                    </select>
+                    
+                    <div class="input-group" style="margin-top: 15px;">
+                        <label>Şu anki Oda: <span id="currentRoom" class="total-bonus">Oda 1</span></label>
+                    </div>
+                    
+                    <div class="input-group" style="margin-top: 10px;">
+                        <label>Kat Yapısı: Her katta 2 Tek Hücreli VEYA 1 Çift Hücreli Miner</label>
+                    </div>
+                </div>
+
+                <div class="panel-section calculation-info">
+                    <h3>Yeni Hesaplama Sistemi</h3>
+                    <p>1. <strong>Toplam Miner Gücü:</strong> Tüm minerların güç toplamı</p>
+                    <p>2. <strong>Toplam Bonus:</strong> Tüm minerların bonus toplamı</p>
+                    <p>3. <strong>Raf Bonusu:</strong> Her raftaki miner gücü × raf bonusu</p>
+                    <p>4. <strong>Toplam Güç:</strong> Miner Gücü + Raf Bonusu</p>
+                </div>
+            </div>
+
+            <!-- Odalar Bölümü -->
+            <div class="rooms-section" id="roomsTab" style="display: none;">
+                <div class="room-selector">
+                    <div class="room-btn active" onclick="selectRoom(1)">Oda 1</div>
+                    <div class="room-btn" onclick="selectRoom(2)">Oda 2</div>
+                    <div class="room-btn" onclick="selectRoom(3)">Oda 3</div>
+                    <div class="room-btn" onclick="selectRoom(4)">Oda 4</div>
+                </div>
+                
+                <div class="rooms-container" id="roomsContainer">
+                    <!-- Odalar buraya eklenecek -->
+                </div>
+            </div>
+        </div>
+
+        <!-- İstatistikler Bölümü -->
+        <div class="stats-panel" id="statsTab" style="display: none;">
+            <h2>Toplam İstatistikler (Yeni Sistem)</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Miner Gücü</div>
+                    <div class="stat-value" id="totalMinerPower">0</div>
+                    <div>TH/s</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Bonus</div>
+                    <div class="stat-value" id="totalMinerBonus">0%</div>
+                    <div>Oran</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Raf Bonusu</div>
+                    <div class="stat-value" id="totalShelfBonus">0</div>
+                    <div>TH/s</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Toplam Güç</div>
+                    <div class="stat-value total-power" id="totalPower">0</div>
+                    <div>TH/s</div>
+                </div>
+            </div>
+            
+            <div class="calculation-info" style="margin-top: 20px;">
+                <div style="color: #2ecc71; font-weight: bold; margin-bottom: 10px;">Hesaplama Formülleri:</div>
+                <div style="font-size: 0.9em; line-height: 1.6;">
+                    <p><strong>1. Toplam Miner Gücü:</strong> Σ(Miner Gücü)</p>
+                    <p><strong>2. Toplam Bonus:</strong> Σ(Miner Bonusu)</p>
+                    <p><strong>3. Raf Bonusu:</strong> Σ(Raf'taki Miner Gücü × Raf Bonusu)</p>
+                    <p><strong>4. Toplam Güç:</strong> Toplam Miner Gücü + Toplam Raf Bonusu</p>
+                    
+                    <div class="formula">
+                        Toplam Güç = Σ(Miner Gücü) + Σ(Raf'taki Miner Gücü × Raf Bonusu)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detaylı Raf Bonusları -->
+            <div style="margin-top: 20px;">
+                <h3>Raf Bonus Detayları</h3>
+                <div id="shelfBonusDetails" style="margin-top: 10px;">
+                    <!-- Raf bonus detayları buraya eklenecek -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Veri depolama
+        let miners = JSON.parse(localStorage.getItem('rollercoinMiners')) || [];
+        let shelves = JSON.parse(localStorage.getItem('rollercoinShelves')) || [];
+        let rooms = JSON.parse(localStorage.getItem('rollercoinRooms')) || initializeRooms();
+        let currentSelectedRoom = 1;
+
+        function initializeRooms() {
+            const roomsObj = {};
+            
+            // Oda 1: 12 raf, her raf 4 katlı
+            roomsObj[1] = Array(12).fill(null).map((_, i) => createShelfData(1, i));
+            
+            // Oda 2, 3, 4: 18 raf, her raf 4 katlı
+            for (let roomId = 2; roomId <= 4; roomId++) {
+                roomsObj[roomId] = Array(18).fill(null).map((_, i) => createShelfData(roomId, i));
+            }
+            
+            return roomsObj;
+        }
+
+        function createShelfData(roomId, index) {
+            return {
+                id: `room${roomId}-shelf${index+1}`,
+                shelfId: null,
+                floors: Array(4).fill().map(() => ({
+                    type: 'none', // 'none', 'single', 'double'
+                    miners: [] // Tek hücreli için max 2, çift hücreli için max 1
+                }))
+            };
+        }
+
+        // DOM elementleri
+        const minerList = document.getElementById('minerList');
+        const shelfList = document.getElementById('shelfList');
+        const roomsContainer = document.getElementById('roomsContainer');
+        const roomSelect = document.getElementById('roomSelect');
+        const currentRoomSpan = document.getElementById('currentRoom');
+        const totalMinerPower = document.getElementById('totalMinerPower');
+        const totalMinerBonus = document.getElementById('totalMinerBonus');
+        const totalShelfBonus = document.getElementById('totalShelfBonus');
+        const totalPower = document.getElementById('totalPower');
+        const shelfBonusDetails = document.getElementById('shelfBonusDetails');
+
+        // Event listeners
+        document.getElementById('addMinerBtn').addEventListener('click', addMiner);
+        document.getElementById('addShelfBtn').addEventListener('click', addShelf);
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', init);
+
+        function init() {
+            updateMinerList();
+            updateShelfList();
+            renderCurrentRoom();
+            updateStats();
+        }
+
+        // Sekme yönetimi
+        function showTab(tabName) {
+            // Tüm sekmeleri gizle
+            document.getElementById('controlTab').style.display = 'none';
+            document.getElementById('roomsTab').style.display = 'none';
+            document.getElementById('statsTab').style.display = 'none';
+            
+            // Tüm tab butonlarını pasif yap
+            document.querySelectorAll('.mobile-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Seçilen sekmeyi göster
+            document.getElementById(tabName + 'Tab').style.display = 'block';
+            
+            // Tab butonunu aktif yap
+            event.target.classList.add('active');
+            
+            // Odalar sekmesindeyse render et
+            if (tabName === 'rooms') {
+                renderCurrentRoom();
+            }
+        }
+
+        // Oda seçimi
+        function selectRoom(roomId) {
+            currentSelectedRoom = roomId;
+            
+            // Tüm oda butonlarını güncelle
+            document.querySelectorAll('.room-btn').forEach((btn, index) => {
+                if (index + 1 === roomId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Oda seçicisini güncelle
+            roomSelect.value = roomId;
+            currentRoomSpan.textContent = `Oda ${roomId}`;
+            
+            // Odayı render et
+            renderCurrentRoom();
+        }
+
+        function changeRoom() {
+            const roomId = parseInt(roomSelect.value);
+            selectRoom(roomId);
+        }
+
+        function renderCurrentRoom() {
+            roomsContainer.innerHTML = '';
+            
+            const roomDiv = document.createElement('div');
+            roomDiv.className = 'room';
+            
+            const shelfCount = currentSelectedRoom === 1 ? 12 : 18;
+            const shelvesData = rooms[currentSelectedRoom];
+            
+            roomDiv.innerHTML = `
+                <div class="room-header">
+                    <div class="room-title">Oda ${currentSelectedRoom}</div>
+                    <div style="color: #95a5a6; font-size: 0.9em;">
+                        ${shelfCount} Raf × 4 Kat = ${shelfCount * 4} Miner Alanı
+                    </div>
+                </div>
+                <div class="shelves" id="shelvesContainer"></div>
+            `;
+            
+            const shelvesContainer = roomDiv.querySelector('#shelvesContainer');
+            
+            // Her raf için
+            for (let i = 0; i < shelfCount; i++) {
+                const shelf = shelvesData[i];
+                const shelfDiv = document.createElement('div');
+                shelfDiv.className = 'shelf';
+                
+                // Bu rafa atanmış raf bilgisi
+                const assignedShelf = shelves.find(s => s.id === shelf.shelfId);
+                
+                shelfDiv.innerHTML = `
+                    <div class="shelf-number">Raf ${i+1}</div>
+                    ${assignedShelf ? `<div class="shelf-bonus-display">${assignedShelf.bonus}%</div>` : ''}
+                    <select class="shelf-select" onchange="assignShelf(${currentSelectedRoom}, ${i}, this.value)">
+                        <option value="">Raf Seçin</option>
+                        ${shelves.map(s => `
+                            <option value="${s.id}" ${shelf.shelfId === s.id ? 'selected' : ''}>
+                                ${s.name} (${s.bonus}%)
+                            </option>
+                        `).join('')}
+                    </select>
+                    <div class="shelf-floors" id="floors-${currentSelectedRoom}-${i}"></div>
+                `;
+                
+                const floorsContainer = shelfDiv.querySelector(`#floors-${currentSelectedRoom}-${i}`);
+                
+                // Her kat için
+                for (let floorIndex = 0; floorIndex < 4; floorIndex++) {
+                    const floor = shelf.floors[floorIndex];
+                    const floorDiv = document.createElement('div');
+                    floorDiv.className = 'floor';
+                    floorDiv.innerHTML = `
+                        <div class="floor-header">Kat ${floorIndex + 1}</div>
+                        <div class="floor-controls">
+                            <select class="floor-type-select" onchange="changeFloorType(${currentSelectedRoom}, ${i}, ${floorIndex}, this.value)">
+                                <option value="none" ${floor.type === 'none' ? 'selected' : ''}>Boş Kat</option>
+                                <option value="single" ${floor.type === 'single' ? 'selected' : ''}>2 Tek Hücreli Miner</option>
+                                <option value="double" ${floor.type === 'double' ? 'selected' : ''}>1 Çift Hücreli Miner</option>
+                            </select>
+                            <div class="miner-slots" id="miner-slots-${currentSelectedRoom}-${i}-${floorIndex}"></div>
+                            ${floor.type !== 'none' ? `
+                                <div class="add-miner-btn" onclick="showMinerSelectionModal(${currentSelectedRoom}, ${i}, ${floorIndex})">
+                                    + Miner Ekle
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    
+                    const minerSlotsContainer = floorDiv.querySelector(`#miner-slots-${currentSelectedRoom}-${i}-${floorIndex}`);
+                    
+                    // Miner slotlarını render et
+                    renderMinerSlots(currentSelectedRoom, i, floorIndex, minerSlotsContainer);
+                    
+                    floorsContainer.appendChild(floorDiv);
+                }
+                
+                shelvesContainer.appendChild(shelfDiv);
+            }
+            
+            roomsContainer.appendChild(roomDiv);
+        }
+
+        function renderMinerSlots(roomId, shelfIndex, floorIndex, container) {
+            const floor = rooms[roomId][shelfIndex].floors[floorIndex];
+            container.innerHTML = '';
+            
+            if (floor.type === 'none') {
+                container.innerHTML = '<div class="empty-slot">Boş Kat</div>';
+                return;
+            }
+            
+            if (floor.type === 'single') {
+                // 2 tek hücreli miner slotu
+                for (let slotIndex = 0; slotIndex < 2; slotIndex++) {
+                    const minerId = floor.miners[slotIndex];
+                    const miner = minerId ? miners.find(m => m.id === minerId) : null;
+                    const minerNumber = miner ? getMinerNumber(miner.id) : null;
+                    
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = `miner-slot single ${miner ? 'filled' : 'empty'}`;
+                    slotDiv.onclick = miner ? 
+                        () => showMinerOptions(roomId, shelfIndex, floorIndex, slotIndex) : 
+                        () => showMinerSelectionModal(roomId, shelfIndex, floorIndex, slotIndex);
+                    
+                    if (miner) {
+                        slotDiv.innerHTML = `
+                            ${minerNumber ? `<div class="miner-number">${minerNumber}</div>` : ''}
+                            <div class="miner-actions">
+                                <button class="remove-miner-btn" onclick="event.stopPropagation(); removeMinerFromSlot(${roomId}, ${shelfIndex}, ${floorIndex}, ${slotIndex})">
+                                    ×
+                                </button>
+                            </div>
+                            <div class="miner-content">
+                                <div class="miner-type-badge badge-single">Tek Hücre</div>
+                                <div class="miner-name">${miner.name}</div>
+                                <div class="miner-stats">
+                                    <div class="miner-power">${miner.power} TH/s</div>
+                                    <div class="miner-bonus">${miner.bonus}% Bonus</div>
+                                </div>
+                                <div class="click-hint">Kaldırmak için tıkla</div>
+                            </div>
+                        `;
+                    } else {
+                        slotDiv.innerHTML = `
+                            <div class="miner-content">
+                                <div class="miner-type-badge badge-single">Tek Hücre</div>
+                                <div style="color: #95a5a6; font-size: 0.9em;">Boş Slot</div>
+                                <div style="font-size: 0.8em; color: #7f8c8d; margin-top: 5px;">Tıkla ve Miner Seç</div>
+                            </div>
+                        `;
+                    }
+                    
+                    container.appendChild(slotDiv);
+                }
+            } else if (floor.type === 'double') {
+                // 1 çift hücreli miner slotu
+                const minerId = floor.miners[0];
+                const miner = minerId ? miners.find(m => m.id === minerId) : null;
+                const minerNumber = miner ? getMinerNumber(miner.id) : null;
+                
+                const slotDiv = document.createElement('div');
+                slotDiv.className = `miner-slot double ${miner ? 'filled' : 'empty'}`;
+                slotDiv.onclick = miner ? 
+                    () => showMinerOptions(roomId, shelfIndex, floorIndex, 0) : 
+                    () => showMinerSelectionModal(roomId, shelfIndex, floorIndex, 0);
+                
+                if (miner) {
+                    slotDiv.innerHTML = `
+                        ${minerNumber ? `<div class="miner-number">${minerNumber}</div>` : ''}
+                        <div class="miner-actions">
+                            <button class="remove-miner-btn" onclick="event.stopPropagation(); removeMinerFromSlot(${roomId}, ${shelfIndex}, ${floorIndex}, 0)">
+                                ×
+                            </button>
+                        </div>
+                        <div class="miner-content">
+                            <div class="miner-type-badge badge-double">Çift Hücre</div>
+                            <div class="miner-name">${miner.name}</div>
+                            <div class="miner-stats">
+                                <div class="miner-power">${miner.power} TH/s</div>
+                                <div class="miner-bonus">${miner.bonus}% Bonus</div>
+                            </div>
+                            <div class="click-hint">Kaldırmak için tıkla</div>
+                        </div>
+                    `;
+                } else {
+                    slotDiv.innerHTML = `
+                        <div class="miner-content">
+                            <div class="miner-type-badge badge-double">Çift Hücre</div>
+                            <div style="color: #95a5a6; font-size: 0.9em;">Boş Slot</div>
+                            <div style="font-size: 0.8em; color: #7f8c8d; margin-top: 5px;">Tıkla ve Miner Seç</div>
+                        </div>
+                    `;
+                }
+                
+                container.appendChild(slotDiv);
+            }
+        }
+
+        function getMinerNumber(minerId) {
+            const index = miners.findIndex(m => m.id === minerId);
+            return index !== -1 ? index + 1 : null;
+        }
+
+        function showMinerOptions(roomId, shelfIndex, floorIndex, slotIndex) {
+            const floor = rooms[roomId][shelfIndex].floors[floorIndex];
+            const minerId = floor.miners[slotIndex];
+            
+            if (!minerId) return;
+            
+            const action = confirm("Bu miner'ı kaldırmak istiyor musunuz?\n\nEvet'i seçerseniz miner kaldırılacak.\nHayır'ı seçerseniz işlem iptal edilecek.");
+            
+            if (action) {
+                removeMinerFromSlot(roomId, shelfIndex, floorIndex, slotIndex);
+            }
+        }
+
+        function showMinerSelectionModal(roomId, shelfIndex, floorIndex, slotIndex = 0) {
+            const floor = rooms[roomId][shelfIndex].floors[floorIndex];
+            const requiredType = floor.type === 'single' ? 'single' : 'double';
+            
+            // Filtrelenmiş miner listesi
+            const availableMiners = miners.filter(miner => miner.type === requiredType);
+            
+            if (availableMiners.length === 0) {
+                alert(`Mevcut ${requiredType === 'single' ? 'tek hücreli' : 'çift hücreli'} miner bulunmuyor.`);
+                return;
+            }
+            
+            // Miner'ları numaralandırarak listele
+            let options = availableMiners.map((miner, index) => 
+                `${index + 1}. ${miner.name} (${miner.power} TH/s, ${miner.bonus}%)`
+            ).join('\n');
+            
+            const selection = prompt(
+                `${requiredType === 'single' ? 'Tek Hücreli' : 'Çift Hücreli'} Miner Seçin:\n\n` +
+                options +
+                `\n\nMiner numarasını girin (1-${availableMiners.length}):`
+            );
+            
+            if (selection && !isNaN(selection)) {
+                const index = parseInt(selection) - 1;
+                if (index >= 0 && index < availableMiners.length) {
+                    assignMinerToSlot(roomId, shelfIndex, floorIndex, slotIndex, availableMiners[index].id);
+                } else {
+                    alert(`Geçersiz numara! Lütfen 1-${availableMiners.length} arasında bir sayı girin.`);
+                }
+            }
+        }
+
+        function changeFloorType(roomId, shelfIndex, floorIndex, type) {
+            const floor = rooms[roomId][shelfIndex].floors[floorIndex];
+            
+            if (floor.type !== type) {
+                // Tip değiştiğinde minerları temizle
+                floor.type = type;
+                floor.miners = [];
+                
+                // Tek hücreli için 2 boş slot, çift hücreli için 1 boş slot
+                if (type === 'single') {
+                    floor.miners = [null, null];
+                } else if (type === 'double') {
+                    floor.miners = [null];
+                }
+            }
+            
+            saveToLocalStorage();
+            renderCurrentRoom();
+            updateStats();
+        }
+
+        function assignMinerToSlot(roomId, shelfIndex, floorIndex, slotIndex, minerId) {
+            const floor = rooms[roomId][shelfIndex].floors[floorIndex];
+            
+            // Slot index kontrolü
+            if (slotIndex >= floor.miners.length) {
+                floor.miners[slotIndex] = minerId;
+            } else {
+                floor.miners[slotIndex] = minerId;
+            }
+            
+            saveToLocalStorage();
+            renderCurrentRoom();
+            updateStats();
+        }
+
+        function removeMinerFromSlot(roomId, shelfIndex, floorIndex, slotIndex) {
+            const floor = rooms[roomId][shelfIndex].floors[floorIndex];
+            
+            if (slotIndex < floor.miners.length) {
+                floor.miners[slotIndex] = null;
+            }
+            
+            saveToLocalStorage();
+            renderCurrentRoom();
+            updateStats();
+        }
+
+        function assignShelf(roomId, shelfIndex, shelfId) {
+            rooms[roomId][shelfIndex].shelfId = shelfId || null;
+            saveToLocalStorage();
+            updateStats();
+        }
+
+        function addMiner() {
+            const name = document.getElementById('minerName').value.trim();
+            const type = document.getElementById('minerType').value;
+            const power = parseFloat(document.getElementById('minerPower').value);
+            const bonus = parseFloat(document.getElementById('minerBonus').value);
+
+            if (!name || isNaN(power) || isNaN(bonus)) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            if (power <= 0 || bonus < 0) {
+                alert('Güç pozitif, bonus negatif olmayan bir sayı olmalı!');
+                return;
+            }
+
+            const miner = {
+                id: 'miner_' + Date.now(),
+                name,
+                type,
+                power,
+                bonus
+            };
+
+            miners.push(miner);
+            saveToLocalStorage();
+            updateMinerList();
+            clearMinerForm();
+            updateStats();
+            
+            // Odaları yeniden render et
+            if (document.getElementById('roomsTab').style.display === 'block') {
+                renderCurrentRoom();
+            }
+        }
+
+        function addShelf() {
+            const name = document.getElementById('shelfName').value.trim();
+            const bonus = parseFloat(document.getElementById('shelfBonus').value);
+
+            if (!name || isNaN(bonus)) {
+                alert('Lütfen tüm alanları doldurun!');
+                return;
+            }
+
+            if (bonus < 0) {
+                alert('Bonus negatif olamaz!');
+                return;
+            }
+
+            const shelf = {
+                id: 'shelf_' + Date.now(),
+                name,
+                bonus
+            };
+
+            shelves.push(shelf);
+            saveToLocalStorage();
+            updateShelfList();
+            clearShelfForm();
+            updateStats();
+            
+            // Odaları yeniden render et
+            if (document.getElementById('roomsTab').style.display === 'block') {
+                renderCurrentRoom();
+            }
+        }
+
+        function deleteMiner(id) {
+            if (!confirm('Bu minerı silmek istediğinize emin misiniz? Bu miner tüm odalardan kaldırılacak.')) return;
+            
+            miners = miners.filter(miner => miner.id !== id);
+            
+            // Odalardan bu minerı kaldır
+            for (const roomId in rooms) {
+                rooms[roomId].forEach(shelf => {
+                    shelf.floors.forEach(floor => {
+                        floor.miners = floor.miners.map(minerId => minerId === id ? null : minerId);
+                    });
+                });
+            }
+            
+            saveToLocalStorage();
+            updateMinerList();
+            if (document.getElementById('roomsTab').style.display === 'block') {
+                renderCurrentRoom();
+            }
+            updateStats();
+        }
+
+        function deleteShelf(id) {
+            if (!confirm('Bu rafı silmek istediğinize emin misiniz? Bu raf tüm odalardan kaldırılacak.')) return;
+            
+            shelves = shelves.filter(shelf => shelf.id !== id);
+            
+            // Odalardan bu rafı kaldır
+            for (const roomId in rooms) {
+                rooms[roomId].forEach(shelf => {
+                    if (shelf.shelfId === id) {
+                        shelf.shelfId = null;
+                    }
+                });
+            }
+            
+            saveToLocalStorage();
+            updateShelfList();
+            if (document.getElementById('roomsTab').style.display === 'block') {
+                renderCurrentRoom();
+            }
+            updateStats();
+        }
+
+        function updateMinerList() {
+            minerList.innerHTML = '';
+            
+            if (miners.length === 0) {
+                minerList.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">Henüz miner eklenmemiş</div>';
+                return;
+            }
+            
+            miners.forEach((miner, index) => {
+                const div = document.createElement('div');
+                div.className = 'miner-item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <strong>
+                            <span class="miner-number-list">${index + 1}.</span>
+                            ${miner.name}
+                        </strong>
+                        <small>
+                            <span class="${miner.type === 'single' ? 'badge-single' : 'badge-double'}" style="padding: 2px 6px; border-radius: 3px; font-size: 0.8em;">
+                                ${miner.type === 'single' ? 'Tek Hücre' : 'Çift Hücre'}
+                            </span>
+                            | ${miner.power} TH/s | ${miner.bonus}%
+                        </small>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="deleteMiner('${miner.id}')" class="btn-danger btn-small">Sil</button>
+                    </div>
+                `;
+                minerList.appendChild(div);
+            });
+        }
+
+        function updateShelfList() {
+            shelfList.innerHTML = '';
+            
+            if (shelves.length === 0) {
+                shelfList.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 20px;">Henüz raf eklenmemiş</div>';
+                return;
+            }
+            
+            shelves.forEach(shelf => {
+                const div = document.createElement('div');
+                div.className = 'shelf-item';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <strong>${shelf.name}</strong>
+                        <small>Bonus: ${shelf.bonus}%</small>
+                    </div>
+                    <div class="item-actions">
+                        <button onclick="deleteShelf('${shelf.id}')" class="btn-danger btn-small">Sil</button>
+                    </div>
+                `;
+                shelfList.appendChild(div);
+            });
+        }
+
+        function updateStats() {
+            let totalMinerPowerValue = 0;
+            let totalMinerBonusValue = 0;
+            let totalShelfBonusValue = 0;
+            let minerCount = 0;
+            let shelfBonusDetailsHTML = '';
+
+            // Her oda için hesapla
+            for (const roomId in rooms) {
+                rooms[roomId].forEach((shelf, shelfIndex) => {
+                    let shelfPower = 0;
+                    let shelfBonusPower = 0;
+                    
+                    // Bu raftaki miner güçleri
+                    shelf.floors.forEach(floor => {
+                        floor.miners.forEach(minerId => {
+                            if (minerId) {
+                                const miner = miners.find(m => m.id === minerId);
+                                if (miner) {
+                                    totalMinerPowerValue += miner.power;
+                                    totalMinerBonusValue += miner.bonus;
+                                    minerCount++;
+                                    
+                                    // Raf gücüne ekle
+                                    shelfPower += miner.power;
+                                }
+                            }
+                        });
+                    });
+                    
+                    // Raf bonusunu hesapla
+                    if (shelf.shelfId && shelfPower > 0) {
+                        const shelfBonus = shelves.find(s => s.id === shelf.shelfId)?.bonus || 0;
+                        const shelfBonusAmount = shelfPower * (shelfBonus / 100);
+                        totalShelfBonusValue += shelfBonusAmount;
+                        
+                        // Raf bonus detaylarını ekle
+                        shelfBonusDetailsHTML += `
+                            <div style="background: rgba(255,255,255,0.05); padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 0.85em;">
+                                <strong>Oda ${roomId} - Raf ${shelfIndex + 1}:</strong>
+                                <div style="margin-left: 10px;">
+                                    Miner Gücü: ${shelfPower.toFixed(2)} TH/s<br>
+                                    Raf Bonusu: ${shelfBonus}%<br>
+                                    Bonus Değeri: <span style="color: #2ecc71;">${shelfBonusAmount.toFixed(2)} TH/s</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+            }
+
+            // Toplam güç hesapla
+            const totalPowerValue = totalMinerPowerValue + totalShelfBonusValue;
+
+            // UI güncelle
+            totalMinerPower.textContent = totalMinerPowerValue.toFixed(2);
+            totalMinerBonus.textContent = totalMinerBonusValue.toFixed(2) + '%';
+            totalShelfBonus.textContent = totalShelfBonusValue.toFixed(2);
+            totalPower.textContent = totalPowerValue.toFixed(2);
+            
+            // Raf bonus detaylarını göster
+            if (shelfBonusDetailsHTML) {
+                shelfBonusDetails.innerHTML = shelfBonusDetailsHTML;
+            } else {
+                shelfBonusDetails.innerHTML = '<div style="text-align: center; color: #95a5a6; padding: 10px;">Henüz raf bonusu hesaplanmadı</div>';
+            }
+        }
+
+        function clearMinerForm() {
+            document.getElementById('minerName').value = '';
+            document.getElementById('minerPower').value = '';
+            document.getElementById('minerBonus').value = '';
+            document.getElementById('minerName').focus();
+        }
+
+        function clearShelfForm() {
+            document.getElementById('shelfName').value = '';
+            document.getElementById('shelfBonus').value = '';
+            document.getElementById('shelfName').focus();
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('rollercoinMiners', JSON.stringify(miners));
+            localStorage.setItem('rollercoinShelves', JSON.stringify(shelves));
+            localStorage.setItem('rollercoinRooms', JSON.stringify(rooms));
+        }
+
+        // Global fonksiyonlar
+        window.deleteMiner = deleteMiner;
+        window.deleteShelf = deleteShelf;
+        window.assignShelf = assignShelf;
+        window.assignMinerToSlot = assignMinerToSlot;
+        window.removeMinerFromSlot = removeMinerFromSlot;
+        window.changeFloorType = changeFloorType;
+        window.showMinerSelectionModal = showMinerSelectionModal;
+        window.showMinerOptions = showMinerOptions;
+        window.showTab = showTab;
+        window.selectRoom = selectRoom;
+        window.changeRoom = changeRoom;
+    </script>
+</body>
+</html>
