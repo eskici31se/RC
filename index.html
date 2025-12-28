@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kişisel Madenci Paneli</title>
+    <style>
+        :root { --bg: #0b0b1a; --card: #16162d; --accent: #00f2ff; --danger: #ff4d4d; --text: #e0e0e0; --edit: #f59e0b; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding-top: 75px; }
+
+        /* Üst Bilgi Paneli */
+        .header-stats { 
+            position: fixed; top: 0; left: 0; right: 0; height: 65px;
+            background: rgba(11, 11, 26, 0.95); display: flex; justify-content: space-around; 
+            align-items: center; z-index: 1000; border-bottom: 2px solid var(--accent);
+            backdrop-filter: blur(8px);
+        }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 9px; color: #888; letter-spacing: 1px; }
+        .stat-val { font-size: 12px; font-weight: bold; color: var(--accent); display: block; }
+
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+        .panel { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #2d2d4d; }
+        h3 { margin-top: 0; font-size: 15px; color: var(--accent); display: flex; justify-content: space-between; }
+        
+        input, select { width: 100%; padding: 10px; margin: 5px 0; border-radius: 6px; border: 1px solid #333; background: #050510; color: white; box-sizing: border-box; font-size: 14px; }
+        .btn { width: 100%; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+        .btn-add { background: var(--accent); color: #000; }
+        .btn-place { background: #5d3fd3; color: white; }
+        .btn-reset { background: #333; color: #888; font-size: 11px; margin-top: 20px; width: 100%; }
+
+        /* Envanter Listesi */
+        .inv-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .inv-card { background: #1e1e3e; padding: 10px; border-radius: 8px; border: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
+        .inv-info { font-size: 12px; }
+        .inv-info strong { display: block; color: var(--text); font-size: 13px; }
+        .inv-info span { color: var(--accent); }
+        .inv-controls { display: flex; gap: 10px; align-items: center; }
+
+        /* Raf ve Kat Tasarımı */
+        .shelf { background: #1a1a35; border-radius: 10px; padding: 12px; margin-bottom: 20px; border: 1px solid #333; }
+        .shelf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .shelf-name { color: #fbbf24; font-weight: bold; font-size: 14px; }
+        
+        .floor { height: 40px; background: #08081a; margin: 4px 0; border-radius: 4px; display: flex; gap: 3px; padding: 2px; }
+        .slot { flex: 1; background: #2a2a4d; border-radius: 3px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 10px; border: 1px solid #3d3d5d; overflow: hidden; }
+        .slot.double { flex: 2; border-color: var(--accent); }
+        .btn-remove { color: var(--danger); font-weight: bold; background: none; border: none; font-size: 16px; cursor: pointer; }
+        
+        .edit-badge { background: var(--edit); color: black; padding: 3px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; font-weight: bold; }
+        .inv-del { color: var(--danger); font-weight: bold; cursor: pointer; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-stats">
+        <div class="stat-box"><span class="stat-label">TOPLAM GÜÇ</span><span id="pPower" class="stat-val">0 TH</span></div>
+        <div class="stat-box"><span class="stat-label">TOPLAM BONUS</span><span id="pBonus" class="stat-val">%0</span></div>
+        <div class="stat-box"><span class="stat-label">BONUSLU GÜÇ</span><span id="pFinal" class="stat-val">0 TH</span></div>
+    </div>
+
+    <div class="container">
+        <div class="panel">
+            <h3>Madenci Tanımla</h3>
+            <input type="text" id="mName" placeholder="Madenci İsmi">
+            <div style="display: flex; gap: 8px;">
+                <input type="number" id="mPower" placeholder="Güç (TH)">
+                <input type="number" id="mBonus" placeholder="Bonus (%)">
+            </div>
+            <select id="mType">
+                <option value="1">Tek Hücreli</option>
+                <option value="2">Çift Hücreli</option>
+            </select>
+            <button class="btn btn-add" onclick="addInv()">Envantere Ekle</button>
+            <div id="invList" class="inv-container"></div>
+        </div>
+
+        <div class="panel">
+            <h3>Raf Kontrolü</h3>
+            <div style="display: flex; gap: 8px;">
+                <select id="selRoom" onchange="render()"><option value="0">Oda 1 (12 Raf)</option><option value="1">Oda 2 (18 Raf)</option><option value="2">Oda 3 (18 Raf)</option><option value="3">Oda 4 (18 Raf)</option></select>
+                <select id="selShelf"></select>
+            </div>
+            <select id="selMiner"></select>
+            <button class="btn btn-place" onclick="place()">Madenciyi Rafa Yerleştir</button>
+        </div>
+
+        <div id="roomView"></div>
+
+        <button class="btn btn-reset" onclick="resetAll()">Tüm Verileri Sıfırla</button>
+    </div>
+
+<script>
+    let inventory = JSON.parse(localStorage.getItem('mining_inv')) || [];
+    let roomSizes = [12, 18, 18, 18];
+    let facility = JSON.parse(localStorage.getItem('mining_fac')) || 
+                  roomSizes.map(size => Array.from({length: size}, (_, i) => ({name: `Raf ${i+1}`, bonus: 0, floors: [[],[],[],[]]})));
+
+    function save() {
+        localStorage.setItem('mining_inv', JSON.stringify(inventory));
+        localStorage.setItem('mining_fac', JSON.stringify(facility));
+        calculate();
+    }
+
+    function format(v) {
+        if (v >= 1e9) return (v/1e9).toFixed(3) + " Zh/s";
+        if (v >= 1e6) return (v/1e6).toFixed(3) + " Eh/s";
+        if (v >= 1e3) return (v/1e3).toFixed(3) + " Ph/s";
+        return v.toFixed(2) + " TH/s";
+    }
+
+    function addInv() {
+        const n = document.getElementById('mName').value;
+        const p = parseFloat(document.getElementById('mPower').value);
+        const b = parseFloat(document.getElementById('mBonus').value) || 0;
+        const t = parseInt(document.getElementById('mType').value);
+        if(!n || isNaN(p)) return alert("Lütfen isim ve güç girin!");
+        inventory.push({ id: Date.now(), name: n, power: p, bonus: b, size: t });
+        save(); updateUI();
+    }
+
+    function updateUI() {
+        const invList = document.getElementById('invList');
+        invList.innerHTML = inventory.map(m => `
+            <div class="inv-card">
+                <div class="inv-info">
+                    <strong>${m.name}</strong>
+                    <span>${m.power} TH / %${m.bonus} (${m.size==2?'Çift':'Tek'})</span>
+                </div>
+                <div class="inv-controls">
+                    <span class="edit-badge" onclick="editMiner(${m.id})">DÜZENLE</span>
+                    <span class="inv-del" onclick="delInv(${m.id})">×</span>
+                </div>
+            </div>
+        `).join('');
+
+        document.getElementById('selMiner').innerHTML = inventory.map(m => 
+            `<option value="${m.id}">${m.name}</option>`).join('');
+        const r = document.getElementById('selRoom').value;
+        document.getElementById('selShelf').innerHTML = facility[r].map((s, i) => `<option value="${i}">${s.name}</option>`).join('');
+    }
+
+    function editMiner(id) {
+        const m = inventory.find(x => x.id === id);
+        const nName = prompt("Yeni İsim:", m.name);
+        const nPower = prompt("Yeni Güç (TH):", m.power);
+        const nBonus = prompt("Yeni Bonus (%):", m.bonus);
+        if(nName !== null) m.name = nName;
+        if(nPower !== null) m.power = parseFloat(nPower) || 0;
+        if(nBonus !== null) m.bonus = parseFloat(nBonus) || 0;
+
+        // Yerleştirilenleri güncelle
+        facility.forEach(room => room.forEach(shelf => shelf.floors.forEach(floor => {
+            floor.forEach(pm => { if(pm.id === id) { pm.name = m.name; pm.power = m.power; pm.bonus = m.bonus; }});
+        })));
+        save(); updateUI(); render();
+    }
+
+    function delInv(id) { 
+        if(confirm("Bu madenci envanterden silinecek. Devam?")) {
+            inventory = inventory.filter(x => x.id !== id); 
+            save(); updateUI(); 
+        }
+    }
+
+    function place() {
+        const r = document.getElementById('selRoom').value;
+        const s = document.getElementById('selShelf').value;
+        const m = inventory.find(x => x.id == document.getElementById('selMiner').value);
+        if(!m) return alert("Önce envantere madenci ekleyin!");
+        let placed = false;
+        for(let f=0; f<4; f++) {
+            let used = facility[r][s].floors[f].reduce((a, b) => a + b.size, 0);
+            if(used + m.size <= 2) {
+                facility[r][s].floors[f].push({...m, instId: Date.now()});
+                placed = true; break;
+            }
+        }
+        if(!placed) alert("Bu rafta uygun boş kat yok!");
+        save(); render();
+    }
+
+    function editShelf(r, s) {
+        const nN = prompt("Raf İsmi:", facility[r][s].name);
+        const nB = prompt("Raf Bonusu (%):", facility[r][s].bonus);
+        if(nN !== null) facility[r][s].name = nN;
+        if(nB !== null) facility[r][s].bonus = parseFloat(nB) || 0;
+        save(); render(); updateUI();
+    }
+
+    function removeM(r, s, f, instId) {
+        facility[r][s].floors[f] = facility[r][s].floors[f].filter(x => x.instId !== instId);
+        save(); render();
+    }
+
+    function calculate() {
+        let tp = 0, tb = 0, tf = 0;
+        facility.forEach(room => room.forEach(shelf => {
+            let sp = 0, smb = 0;
+            shelf.floors.forEach(floor => floor.forEach(m => {
+                tp += m.power; tb += m.bonus; sp += m.power; smb += (m.power * (m.bonus/100));
+            }));
+            tf += (sp + smb) * (1 + (shelf.bonus/100));
+        }));
+        document.getElementById('pPower').innerText = format(tp);
+        document.getElementById('pBonus').innerText = "%" + tb.toFixed(1);
+        document.getElementById('pFinal').innerText = format(tf);
+    }
+
+    function render() {
+        const r = document.getElementById('selRoom').value;
+        const view = document.getElementById('roomView');
+        view.innerHTML = `<h3>Oda ${parseInt(r)+1} Düzeni</h3>`;
+        facility[r].forEach((shelf, sIdx) => {
+            let h = `<div class="shelf">
+                <div class="shelf-header">
+                    <span class="shelf-name">${shelf.name}</span>
+                    <div><span style="font-size:11px; color:var(--accent); margin-right:10px">%${shelf.bonus} Bonus</span><span class="edit-badge" onclick="editShelf(${r},${sIdx})">DÜZENLE</span></div>
+                </div>`;
+            shelf.floors.forEach((floor, fIdx) => {
+                h += `<div class="floor">`;
+                let sz = 0;
+                floor.forEach(m => {
+                    sz += m.size;
+                    h += `<div class="slot ${m.size==2?'double':''}"><span>${m.name}</span><button class="btn-remove" onclick="removeM(${r},${sIdx},${fIdx},${m.instId})">×</button></div>`;
+                });
+                for(let i=0; i < (2-sz); i++) h += `<div class="slot" style="background:transparent; border:1px dashed #333"></div>`;
+                h += `</div>`;
+            });
+            view.innerHTML += h + `</div>`;
+        });
+    }
+
+    function resetAll() {
+        if(confirm("DİKKAT: Tüm envanter ve odalar silinecek. Emin misiniz?")) {
+            localStorage.clear(); location.reload();
+        }
+    }
+
+    updateUI(); render(); calculate();
+</script>
+</body>
+</html>
